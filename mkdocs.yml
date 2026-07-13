@@ -1,0 +1,24 @@
+site_name: AxiomBraid
+site_description: Explainable, safety-first data quality for Python
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Installation: INSTALLATION.md
+  - Quickstart: QUICKSTART.md
+  - Public API: PUBLIC_API.md
+  - CLI: CLI.md
+  - Configuration: CONFIGURATION.md
+  - Architecture: ARCHITECTURE.md
+  - Security & Privacy: SECURITY_AND_PRIVACY.md
+  - Benchmarking: BENCHMARKING.md
+  - Research Readiness: RESEARCH_READINESS.md
+  - Migration: MIGRATION_FROM_DATAGUIDEPY.md
+markdown_extensions:
+  - admonition
+  - attr_list
+  - fenced_code
+  - tables

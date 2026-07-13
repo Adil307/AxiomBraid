@@ -1,0 +1,39 @@
+{
+  "benchmark_version": 1,
+  "axiombraid": "1.0.0",
+  "python": "3.13.5",
+  "platform": "Linux-4.4.0-x86_64-with-glibc2.41",
+  "pandas": "2.2.3",
+  "full_inspection": [
+    {
+      "rows": 1000,
+      "columns": 4,
+      "inspect_seconds": 0.12940316700041876,
+      "cache_miss_seconds": 0.12450166099915805,
+      "cache_hit_seconds": 0.0011178840013599256,
+      "cache_hit_confirmed": true
+    },
+    {
+      "rows": 10000,
+      "columns": 4,
+      "inspect_seconds": 0.7582409019996703,
+      "cache_miss_seconds": 0.7206479420001415,
+      "cache_hit_seconds": 0.004262118000042392,
+      "cache_hit_confirmed": true
+    },
+    {
+      "rows": 50000,
+      "columns": 4,
+      "inspect_seconds": 3.618219226000292,
+      "cache_miss_seconds": 3.93108589700023,
+      "cache_hit_seconds": 0.016480389998832834,
+      "cache_hit_confirmed": true
+    }
+  ],
+  "streaming": {
+    "rows": 100000,
+    "sample_rows": 10000,
+    "seconds": 1.157768003999081
+  },
+  "warning": "Local benchmark only. Results are not portable across hardware, operating systems, Python versions, or pandas versions."
+}

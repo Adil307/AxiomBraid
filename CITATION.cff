@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use AxiomBraid in research, please cite the software release."
+title: "AxiomBraid: Explainable, Safety-First Data Quality for Python"
+type: software
+authors:
+  - family-names: "Adil"
+    given-names: "Muhammad Adil"
+version: "1.0.0"
+date-released: "2026-07-13"
+license: MIT

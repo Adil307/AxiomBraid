@@ -1,0 +1,9 @@
+Student_ID,Name,Department,Country,Study_Hours,Attendance,Final_Marks,Age,Enrollment_Date,Status
+ST001,Ali,CS,Pakistan,5.5,88,82,20,2024-01-10,Pass
+ST002,Sara,cs,Pakistan,3.0,72,65,21,2024/02/15,PASS
+ST003,Hina, CS ,Pakistan,4.0,91,79,-4,15 March 2024,Pass
+ST004,Usman,Zoology,Pakistan,2.0,60,48,22,2024-04-20,Fail
+ST005,Ayesha,zoology,Pakistan,4.5,105,73,23,2024/05/11,Pass
+ST006,Adil,CS,Pakistan,50.0,80,110,24,19 June 2024,Pass
+ST007,Maria,Math,Pakistan,6.0,77,90,20,2024-07-01,Pass
+ST008,Hamza,Math,Pakistan,7.0,82,85,21,2024/08/05,Pass
