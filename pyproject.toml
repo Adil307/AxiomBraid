@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "axiombraid"
-version = "1.0.0"
+version = "1.0.1"
 description = "Explainable, safety-first data quality, validation, cleaning, and drift analysis."
 readme = "README.md"
 requires-python = ">=3.10"

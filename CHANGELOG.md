@@ -1,6 +1,12 @@
 # Changelog
+## 1.0.1
 
-## 1.0.0 — 2026-07-13
+### Documentation
+
+- Corrected the PyPI installation instructions.
+- Separated normal PyPI installation from development installation.
+
+## 1.0.1 — 2026-07-13
 
 Stable release:
 
