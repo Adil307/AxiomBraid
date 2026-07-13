@@ -77,7 +77,7 @@ def test_html_dark_theme(tmp_path):
     html = path.read_text(encoding="utf-8")
     assert "Theme: dark" in html
     assert "#0f172a" in html
-    assert "AxiomBraid 1.0.0" in html
+    assert "AxiomBraid 1.0.1" in html
 
 
 def test_html_custom_title(tmp_path):

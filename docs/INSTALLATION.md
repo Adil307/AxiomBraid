@@ -9,7 +9,7 @@ py -m pip install -e ".[dev]"
 ## Wheel installation
 
 ```powershell
-py -m pip install axiombraid-1.0.0-py3-none-any.whl
+py -m pip install axiombraid-1.0.1-py3-none-any.whl
 ```
 
 ## Optional chart support

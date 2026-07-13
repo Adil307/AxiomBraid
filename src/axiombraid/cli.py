@@ -17,7 +17,7 @@ def _add_performance_arguments(parser):
 
 def build_parser(prog="axiombraid"):
     parser = argparse.ArgumentParser(prog=prog, description="Explainable, safety-first data quality analysis.")
-    parser.add_argument("--version", action="version", version="AxiomBraid 1.0.0")
+    parser.add_argument("--version", action="version", version="AxiomBraid 1.0.1")
     subs = parser.add_subparsers(dest="command", required=True)
     p = subs.add_parser("inspect", help="Inspect one dataset."); p.add_argument("data"); p.add_argument("--config"); p.add_argument("--output", default="axiombraid_report")
     p.add_argument("--format", dest="formats", action="append", choices=["console","json","html","charts"]); p.add_argument("--language", choices=["en","roman_urdu"]); p.add_argument("--theme", choices=available_themes()); _add_performance_arguments(p)

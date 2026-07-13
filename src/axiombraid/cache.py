@@ -47,7 +47,7 @@ class InspectionCache:
         payload = {
             "format": CACHE_FORMAT_VERSION,
             "library": "axiombraid",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "data_digest": _data_digest(data),
             "language": language,
             "config": config,
