@@ -28,8 +28,30 @@ AB.export_html("students.csv", "reports/students.html", theme="dark")
 
 ## Installation
 
+Install the stable release from PyPI:
+
+```bash
+pip install axiombraid
+```
+
+On Windows:
+
 ```powershell
-py -m pip install -e ".[dev]"
+py -m pip install axiombraid
+```
+
+Optional chart support:
+
+```bash
+pip install "axiombraid[charts]"
+```
+
+### Development installation
+
+```bash
+git clone https://github.com/Adil307/AxiomBraid.git
+cd AxiomBraid
+pip install -e ".[dev]"
 ```
 
 ## Stable API
