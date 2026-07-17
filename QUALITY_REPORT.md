@@ -1,35 +1,37 @@
-# AxiomBraid 1.0 Quality Report
+# AxiomBraid 2.0.0 Quality Report
 
-Generated: 2026-07-13
+Generated: 2026-07-16
 
 ## Verification summary
 
-- Automated tests: **144 passed**
-- Measured statement/branch coverage: **89%** on the local verification environment
+- Automated tests: **213 passed**
+- Measured statement/branch coverage: **87%** in the verification environment
+- Python source compilation: passed
 - Critical Ruff checks: passed
+- Release metadata checker: passed
 - Wheel build: passed
 - Source distribution build: passed
-- Twine metadata/readme checks: passed
-- Fresh virtual-environment installation: passed
+- Twine metadata and README checks: passed
+- Fresh virtual-environment installation with dependencies: passed
 - `AB.self_check()`: passed
-- `axiombraid --version`: passed
+- `AB.compatibility_check()`: passed
 - `python -m axiombraid --version`: passed
-- PEP 561 `py.typed` marker: present in wheel
+- PEP 561 `py.typed` marker: included
 
 ## Verification environment
 
 - Python: 3.13.5
 - pandas: 2.2.3
-- Platform: Linux-4.4.0-x86_64-with-glibc2.41
+- Platform: Linux verification environment
 
-## Local benchmark snapshot
+## Distribution artifacts
 
-| Rows | Full inspection | Cache miss | Cache hit |
-|---:|---:|---:|---:|
-| 1,000 | 0.1294s | 0.1245s | 0.0011s |
-| 10,000 | 0.7582s | 0.7206s | 0.0043s |
-| 50,000 | 3.6182s | 3.9311s | 0.0165s |
+- `axiombraid-2.0.0-py3-none-any.whl`
+- `axiombraid-2.0.0.tar.gz`
 
-Streaming profile: 100,000 rows with a 10,000-row sample in 1.1578s.
+## Interpretation boundaries
 
-> These timings are local regression baselines, not universal performance claims. Hardware, operating system, Python, pandas, storage, and dataset shape affect results.
+- Confidence scores express evidence strength and are not calibrated probabilities.
+- Evaluation metrics operate at issue/column granularity.
+- Runtime and memory results depend on hardware, Python, pandas, dataset shape, and storage.
+- Safety-first cleaning intentionally leaves risky changes for review.

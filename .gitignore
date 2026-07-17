@@ -14,3 +14,41 @@ reports/
 site/
 .idea/
 .vscode/
+
+# Generated Doxygen documentation
+docs/doxygen/
+
+# Secrets
+.env
+.env.*
+!.env.example
+secrets.json
+credentials.json
+config.private.json
+service-account.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Private research
+Research-Private/
+research-private/
+private-research/
+paper-private/
+manuscript-private/
+unpublished-results/
+locked-experiments/
+reviewer-notes/
+supervisor-comments/
+
+# Sensitive datasets
+private-data/
+sensitive-data/
+raw-private-data/
+datasets/private/
+datasets/restricted/
+
+# Generated Doxygen files
+docs/doxygen/
+AxiomBraid-*-Doxygen-Documentation.zip

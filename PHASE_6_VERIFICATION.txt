@@ -1,0 +1,33 @@
+AxiomBraid Version 2 Phase 6 Verification
+Version: 2.0.0a6
+Date: 2026-07-16
+
+Verification completed:
+- 203 automated tests passed
+- Python compileall passed
+- Phase 6 example executed successfully
+- Detection evaluation produced precision, recall, and F1 output
+- Baseline subtraction verified
+- Per-detector metrics verified
+- Quality-score response verified
+- Confidence threshold suggestion verified
+- Runtime and Python-tracked memory benchmark verified
+- Scaling benchmark verified
+- Version 1 and Version 2 compatibility check passed
+- CLI evaluate command tested
+- CLI benchmark command tested
+- Wheel build passed
+- Source distribution build passed
+- Twine checks passed
+- Fresh virtual-environment installation passed
+- AB.self_check() returned ok=True
+- AB.compatibility_check() returned ok=True
+
+Built artifacts verified:
+- axiombraid-2.0.0a6-py3-none-any.whl
+- axiombraid-2.0.0a6.tar.gz
+
+Important interpretation:
+- Detection metrics are measured at issue/column granularity.
+- Confidence values are evidence-strength scores, not calibrated probabilities.
+- tracemalloc may not include every native-library memory allocation.

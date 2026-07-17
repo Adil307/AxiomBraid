@@ -14,3 +14,8 @@ recursive-include docs *.md
 recursive-include examples *.py *.csv *.yaml
 recursive-include benchmarks *.py *.json
 recursive-include .github *.yml
+include START_HERE_PHASE_7.md
+include V2_PHASE_7_SETUP_AND_RELEASE_GUIDE.md
+include PHASE_7_VERIFICATION.txt
+include GITHUB_RELEASE_NOTES_2.0.0.md
+recursive-include scripts *.py
