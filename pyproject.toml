@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "axiombraid"
-version = "1.0.1"
+version = "2.0.0"
 description = "Explainable, safety-first data quality, validation, cleaning, and drift analysis."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,6 +50,13 @@ dev = [
   "matplotlib>=3.8",
 ]
 all = ["matplotlib>=3.8", "mkdocs>=1.6", "mkdocs-material>=9.5"]
+
+[project.urls]
+Homepage = "https://github.com/Adil307/AxiomBraid"
+Documentation = "https://adil307.github.io/AxiomBraid/"
+Repository = "https://github.com/Adil307/AxiomBraid"
+Issues = "https://github.com/Adil307/AxiomBraid/issues"
+Changelog = "https://github.com/Adil307/AxiomBraid/blob/main/CHANGELOG.md"
 
 [project.scripts]
 axiombraid = "axiombraid.cli:main"

@@ -10,13 +10,24 @@ nav:
   - Installation: INSTALLATION.md
   - Quickstart: QUICKSTART.md
   - Public API: PUBLIC_API.md
+  - API Reference: API_REFERENCE.md
   - CLI: CLI.md
   - Configuration: CONFIGURATION.md
   - Architecture: ARCHITECTURE.md
+  - API Stability: API_STABILITY.md
+  - Migration 1.x to 2.0: MIGRATION_1_TO_2.md
+  - Version 2 Release Notes: RELEASE_NOTES_2_0.md
   - Security & Privacy: SECURITY_AND_PRIVACY.md
   - Benchmarking: BENCHMARKING.md
   - Research Readiness: RESEARCH_READINESS.md
-  - Migration: MIGRATION_FROM_DATAGUIDEPY.md
+  - Version 2 Phase 1: VERSION_2_PHASE_1.md
+  - Version 2 Phase 2: VERSION_2_PHASE_2.md
+  - Version 2 Phase 3: VERSION_2_PHASE_3.md
+  - Version 2 Phase 4: VERSION_2_PHASE_4.md
+  - Version 2 Phase 5: VERSION_2_PHASE_5.md
+  - Version 2 Phase 6: VERSION_2_PHASE_6.md
+  - Version 2 Phase 7: VERSION_2_PHASE_7.md
+  - DataGuidePy Migration: MIGRATION_FROM_DATAGUIDEPY.md
 markdown_extensions:
   - admonition
   - attr_list

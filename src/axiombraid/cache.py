@@ -8,8 +8,9 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from ._version import __version__
 
-CACHE_FORMAT_VERSION = 2
+CACHE_FORMAT_VERSION = 3
 
 
 def _stable_json(value: Any) -> str:
@@ -47,7 +48,7 @@ class InspectionCache:
         payload = {
             "format": CACHE_FORMAT_VERSION,
             "library": "axiombraid",
-            "version": "1.0.1",
+            "version": __version__,
             "data_digest": _data_digest(data),
             "language": language,
             "config": config,

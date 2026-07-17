@@ -1,0 +1,21 @@
+AxiomBraid 2.0.0 — Final Doxygen Integration Summary
+
+Added:
+- Doxyfile configured for final version 2.0.0
+- generate_doxygen.cmd (recommended on Windows; no PowerShell signing issue)
+- generate_doxygen.ps1 (optional PowerShell alternative)
+- docs/DOXYGEN.md
+- .github/workflows/doxygen.yml
+- README Doxygen usage section
+- Release checklist Doxygen verification steps
+- Phase 7 verification Doxygen integration record
+
+Verification completed in the packaging environment:
+- Complete automated test suite: 213 passed
+- Python compileall: passed
+- Generated caches removed from the release ZIP
+
+Important:
+- Generated docs/doxygen/html output is not embedded in this ZIP because Doxygen
+  is an external executable. Run generate_doxygen.cmd after extraction.
+- The GitHub Actions workflow can also generate and upload the HTML artifact.

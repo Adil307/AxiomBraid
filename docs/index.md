@@ -1,19 +1,19 @@
-# AxiomBraid 1.0
+# AxiomBraid 2.0
 
-AxiomBraid is an explainable, safety-first Python toolkit for dataset inspection,
-validation, cleaning, reporting, comparison, and drift screening.
+AxiomBraid is an explainable, safety-first toolkit for dataset inspection, validation, conservative cleaning, reporting, comparison, drift screening, controlled corruption, and evaluation.
 
 ```python
 import axiombraid as AB
-
-result = AB.inspect("students.csv")
-AB.report("students.csv")
+result = AB.inspect("students.csv", include_confidence=True, include_quality_profile=True)
+AB.report("students.csv", include_confidence=True, include_quality_profile=True)
 ```
 
-## Design principles
+## Principles
 
-- **Preview before mutation**: cleaning plans are visible before actions run.
-- **Safe defaults**: input DataFrames are not mutated by the functional API.
-- **Explainable findings**: scores and issues include transparent reasons.
-- **Reproducible workflows**: fingerprints, audit logs, contracts, and cache keys.
-- **Beginner-accessible**: concise functions, CLI commands, and Roman Urdu reports.
+- Preview before mutation
+- Safe functional defaults
+- Explainable findings
+- Reproducible workflows
+- Version 1-compatible workflows in Version 2
+
+See [Version 2 Release Notes](RELEASE_NOTES_2_0.md) and [Migration from 1.x](MIGRATION_1_TO_2.md).

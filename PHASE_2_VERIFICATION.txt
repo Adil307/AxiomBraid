@@ -1,0 +1,24 @@
+AxiomBraid Version 2 Phase 2 Verification
+=========================================
+Development version: 2.0.0a2
+Date: 2026-07-15
+
+Verified in the prepared source tree:
+- Full automated test suite: 164 passed
+- Python compileall: passed
+- Phase 2 example: executed successfully
+- Existing Version 1 feature set retained in the project source
+- Confidence remains opt-in for AB.inspect()
+
+Phase 2 additions:
+- Detector-specific confidence evidence
+- Per-column confidence
+- Configurable confidence-level thresholds
+- Configurable detector base scores
+- Confidence factors
+- Aggregate confidence statistics
+- AB.confidence_report()
+
+Scientific interpretation:
+Confidence scores are deterministic evidence-strength heuristics and explicitly
+are not calibrated statistical probabilities.

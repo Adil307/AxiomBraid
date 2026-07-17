@@ -1,0 +1,19 @@
+AxiomBraid Version 2 Phase 5 Verification
+Version represented in Phase 6 full project: 2.0.0a5 foundation
+
+Verified capabilities:
+- Synthetic missing-value injection
+- Exact duplicate-row injection
+- Text case and whitespace inconsistency injection
+- Invalid numeric-range injection
+- Numerical outlier injection
+- Mixed date-format injection
+- Constant-column injection
+- Identifier-like-column injection
+- Deterministic random-state behavior
+- Non-mutating source DataFrame behavior
+- Exact machine-readable ground truth
+- Column restrictions
+- Multi-label range/outlier ground truth
+
+Phase 5 tests are included in tests/test_v20_phase5.py.

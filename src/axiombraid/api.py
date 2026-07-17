@@ -1,4 +1,4 @@
-"""Stable functional API for AxiomBraid 1.0.
+"""Stable functional API for AxiomBraid 2.0.
 
 The recommended style is::
 
@@ -13,6 +13,8 @@ from typing import Any
 import pandas as pd
 
 from .cache import cached_inspect
+from .confidence import add_confidence
+from .scoring_v2 import build_quality_profile
 from .inspector import DataGuide
 from .streaming import stream_csv
 
@@ -40,22 +42,87 @@ def inspect(
     data: Any,
     *,
     language: str = "en",
+    include_confidence: bool = False,
+    confidence_config: dict[str, Any] | None = None,
+    include_quality_profile: bool = False,
+    quality_config: dict[str, Any] | None = None,
     config: Any = None,
     **analysis_options: Any,
 ) -> dict[str, Any]:
-    """Inspect a dataset and return a structured result."""
-    return guide(data, config=config, **analysis_options).inspect(language)
+    """Inspect a dataset and optionally attach confidence and a V2 quality profile."""
+    instance = guide(data, config=config, **analysis_options)
+    result = instance.inspect(language)
+    if include_confidence:
+        result = add_confidence(result, config=confidence_config)
+    if include_quality_profile:
+        result["quality_profile"] = build_quality_profile(
+            instance.dataframe,
+            result,
+            config=quality_config,
+        )
+    return result
+
+
+def inspect_with_confidence(
+    data: Any,
+    *,
+    language: str = "en",
+    confidence_config: dict[str, Any] | None = None,
+    config: Any = None,
+    **analysis_options: Any,
+) -> dict[str, Any]:
+    """Inspect a dataset and attach explainable confidence to each issue."""
+    return inspect(
+        data,
+        language=language,
+        include_confidence=True,
+        confidence_config=confidence_config,
+        config=config,
+        **analysis_options,
+    )
+
+
+def quality_profile(
+    data: Any,
+    *,
+    language: str = "en",
+    quality_config: dict[str, Any] | None = None,
+    config: Any = None,
+    **analysis_options: Any,
+) -> dict[str, Any]:
+    """Return AxiomBraid's explainable Version 2 multi-dimensional quality profile."""
+    instance = guide(data, config=config, **analysis_options)
+    inspection = instance.inspect(language)
+    return build_quality_profile(
+        instance.dataframe,
+        inspection,
+        config=quality_config,
+    )
 
 
 def report(
     data: Any,
     *,
     language: str = "en",
+    include_confidence: bool = False,
+    confidence_config: dict[str, Any] | None = None,
+    confidence_details: str = "full",
+    include_quality_profile: bool = False,
+    quality_config: dict[str, Any] | None = None,
+    quality_details: str = "full",
     config: Any = None,
     **analysis_options: Any,
 ) -> dict[str, Any]:
-    """Print and return a complete console report."""
-    return guide(data, config=config, **analysis_options).report(language)
+    """Print and return a readable report with optional confidence and quality profile."""
+    return guide(data, config=config, **analysis_options).report(
+        language,
+        include_confidence=include_confidence,
+        confidence_config=confidence_config,
+        confidence_details=confidence_details,
+        include_quality_profile=include_quality_profile,
+        quality_config=quality_config,
+        quality_details=quality_details,
+    )
 
 
 def clean(
@@ -142,13 +209,21 @@ def export_html(
     language: str = "en",
     theme: str = "light",
     report_title: str | None = None,
+    include_confidence: bool = False,
+    confidence_config: dict[str, Any] | None = None,
+    include_quality_profile: bool = False,
+    quality_config: dict[str, Any] | None = None,
     config: Any = None,
     **analysis_options: Any,
 ) -> Path:
-    """Create a standalone HTML report."""
+    """Create a standalone HTML report with optional confidence and V2 quality profile."""
     return guide(data, config=config, **analysis_options).export_html(
         path,
         language,
         theme=theme,
         report_title=report_title,
+        include_confidence=include_confidence,
+        confidence_config=confidence_config,
+        include_quality_profile=include_quality_profile,
+        quality_config=quality_config,
     )

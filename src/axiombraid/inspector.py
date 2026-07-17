@@ -11,6 +11,7 @@ from typing import Any
 
 import pandas as pd
 
+from ._version import __version__
 from .cleaning import CleaningMixin
 from .comparison import ComparisonMixin
 from .governance import GovernanceMixin
@@ -1126,14 +1127,31 @@ class DataGuide(
         self,
         path: str | Path = "axiombraid_report.json",
         language: str = "en",
+        *,
+        include_confidence: bool = False,
+        confidence_config: dict[str, Any] | None = None,
+        include_quality_profile: bool = False,
+        quality_config: dict[str, Any] | None = None,
     ) -> Path:
+        """Export a machine-readable JSON report with optional V2 enhancements."""
         output_path = Path(path)
         if output_path.suffix.lower() != ".json":
             output_path = output_path.with_suffix(".json")
         output_path.parent.mkdir(parents=True, exist_ok=True)
+        result = self.inspect(language=language)
+        if include_confidence:
+            from .confidence import add_confidence
+
+            result = add_confidence(result, config=confidence_config)
+        if include_quality_profile:
+            from .scoring_v2 import build_quality_profile
+
+            result["quality_profile"] = build_quality_profile(
+                self.dataframe, result, config=quality_config
+            )
         with output_path.open("w", encoding="utf-8") as file:
             json.dump(
-                self.inspect(language=language),
+                result,
                 file,
                 ensure_ascii=False,
                 indent=2,
@@ -1237,11 +1255,25 @@ class DataGuide(
         *,
         theme: str = "light",
         report_title: str | None = None,
+        include_confidence: bool = False,
+        confidence_config: dict[str, Any] | None = None,
+        include_quality_profile: bool = False,
+        quality_config: dict[str, Any] | None = None,
     ) -> Path:
         language_code = self._language_code(language)
         theme_values = get_theme(theme)
         normalized_theme = str(theme).strip().lower().replace("-", "_")
         result = self.inspect(language_code)
+        if include_confidence:
+            from .confidence import add_confidence
+
+            result = add_confidence(result, config=confidence_config)
+        if include_quality_profile:
+            from .scoring_v2 import build_quality_profile
+
+            result["quality_profile"] = build_quality_profile(
+                self.dataframe, result, config=quality_config
+            )
         output_path = Path(path)
         if output_path.suffix.lower() != ".html":
             output_path = output_path.with_suffix(".html")
@@ -1315,6 +1347,106 @@ class DataGuide(
             "</tr>"
             for column, details in result["column_quality"].items()
         )
+        confidence_section = ""
+        if include_confidence:
+            from .confidence import (
+                confidence_recommendation,
+                humanize_issue_code,
+                simple_issue_evidence,
+            )
+
+            summary = result["confidence_summary"]
+            level_counts = summary["level_counts"]
+            average_percent = int(round((summary.get("average_score") or 0.0) * 100))
+            confidence_cards = (
+                '<div class="grid confidence-grid">'
+                f'<div class="card"><span class="small">Issues assessed</span><div class="value">{summary["issue_count"]}</div></div>'
+                f'<div class="card"><span class="small">High confidence</span><div class="value confidence-high">{level_counts["high"]}</div></div>'
+                f'<div class="card"><span class="small">Medium confidence</span><div class="value confidence-medium">{level_counts["medium"]}</div></div>'
+                f'<div class="card"><span class="small">Low confidence</span><div class="value confidence-low">{level_counts["low"]}</div></div>'
+                f'<div class="card"><span class="small">Average evidence strength</span><div class="value">{average_percent}%</div></div>'
+                '</div>'
+            )
+            issue_cards = []
+            for issue in result["issues"]:
+                confidence = issue["confidence"]
+                score_percent = int(round(float(confidence["score"]) * 100))
+                level = escape(str(confidence["level"]).upper())
+                severity = escape(str(issue.get("severity", "info")).upper())
+                columns = escape(", ".join(map(str, issue.get("columns", []))) or "-")
+                display_name = escape(
+                    humanize_issue_code(str(issue.get("code", "unknown")), language=language_code)
+                )
+                simple_evidence = escape(simple_issue_evidence(issue, language=language_code))
+                recommendation = escape(confidence_recommendation(issue, language=language_code))
+                technical = escape(json.dumps(confidence.get("factors", {}), ensure_ascii=False, default=str, indent=2))
+                issue_cards.append(
+                    '<article class="confidence-issue">'
+                    '<div class="confidence-issue-head">'
+                    f'<h3>{display_name}</h3>'
+                    f'<span class="badge badge-{confidence["level"]}">{score_percent}% {level}</span>'
+                    '</div>'
+                    f'<p><strong>Severity:</strong> {severity} &nbsp; <strong>Column(s):</strong> {columns}</p>'
+                    f'<p><strong>Evidence:</strong> {simple_evidence}</p>'
+                    f'<p><strong>Recommended action:</strong> {recommendation}</p>'
+                    '<details><summary>Technical details</summary>'
+                    f'<pre>{technical}</pre>'
+                    '</details>'
+                    '</article>'
+                )
+            confidence_section = (
+                '<section id="confidence">'
+                '<h2>Confidence Overview</h2>'
+                '<p class="small">Confidence represents the strength of available detection evidence, not statistical probability.</p>'
+                + confidence_cards
+                + '<h3 style="margin-top:24px">Issue Evidence</h3>'
+                + ''.join(issue_cards)
+                + '</section>'
+            )
+
+        quality_profile_section = ""
+        if include_quality_profile and "quality_profile" in result:
+            profile = result["quality_profile"]
+            dimension_cards = "".join(
+                '<div class="card">'
+                f'{escape(name.title())}<div class="value">{details["score"]}/100</div>'
+                f'<div class="small">Weight: {int(round(float(details["weight"]) * 100))}% · {escape(details["rating"])}</div>'
+                '</div>'
+                for name, details in profile["dimensions"].items()
+            )
+            dimension_rows = "".join(
+                "<tr>"
+                f"<td>{escape(name.title())}</td>"
+                f"<td>{details['score']}/100</td>"
+                f"<td>{int(round(float(details['weight']) * 100))}%</td>"
+                f"<td>{escape(details['explanation'])}</td>"
+                f"<td>{escape(details['recommendation'])}</td>"
+                "</tr>"
+                for name, details in profile["dimensions"].items()
+            )
+            priorities = "".join(
+                f'<li><strong>{escape(item["dimension"].title())}:</strong> '
+                f'{item["score"]}/100 — {escape(item["recommendation"])}</li>'
+                for item in profile["priorities"]
+            ) or "<li>No dimension is currently below 90/100.</li>"
+            quality_profile_section = (
+                '<section id="quality-profile">'
+                '<h2>Explainable Data Quality Profile</h2>'
+                f'<p><strong>Overall score:</strong> {profile["score"]}/100 '
+                f'({escape(profile["rating"])})</p>'
+                f'<p class="small">{escape(profile["note"])}</p>'
+                '<div class="grid">' + dimension_cards + '</div>'
+                '<h3 style="margin-top:24px">Dimension breakdown</h3>'
+                '<table><thead><tr><th>Dimension</th><th>Score</th><th>Weight</th><th>What it measures</th><th>Recommended action</th></tr></thead>'
+                f'<tbody>{dimension_rows}</tbody></table>'
+                '<h3 style="margin-top:24px">Improvement priorities</h3><ul>'
+                + priorities + '</ul>'
+                '<details><summary>Scoring configuration and legacy comparison</summary>'
+                f'<pre>{escape(json.dumps({"weights": profile["weights"], "legacy_compatibility_score": profile["legacy_compatibility_score"], "score_difference_from_legacy": profile["score_difference_from_legacy"]}, indent=2, default=str))}</pre>'
+                '</details>'
+                '</section>'
+            )
+
         groups = result["column_groups"]
         special = result["special_columns"]
         title = report_title or (
@@ -1343,13 +1475,27 @@ th, td {{ text-align: left; border-bottom: 1px solid {theme_values["border"]}; p
 th {{ background: {theme_values["surface_alt"]}; }}
 a {{ color: {theme_values["accent"]}; }}
 .small {{ color: {theme_values["muted"]}; font-size: 0.92rem; }}
+.confidence-grid {{ margin: 14px 0 18px; }}
+.confidence-issue {{ background: {theme_values["surface_alt"]}; border: 1px solid {theme_values["border"]}; border-radius: 10px; padding: 16px; margin: 12px 0; }}
+.confidence-issue-head {{ display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }}
+.confidence-issue-head h3 {{ margin: 0; }}
+.badge {{ display: inline-block; padding: 5px 10px; border-radius: 999px; font-weight: bold; font-size: 0.85rem; }}
+.badge-high {{ background: #dcfce7; color: #166534; }}
+.badge-medium {{ background: #fef3c7; color: #92400e; }}
+.badge-low {{ background: #fee2e2; color: #991b1b; }}
+.confidence-high {{ color: #166534; }}
+.confidence-medium {{ color: #92400e; }}
+.confidence-low {{ color: #991b1b; }}
+details {{ margin-top: 10px; }}
+summary {{ cursor: pointer; font-weight: bold; }}
+pre {{ white-space: pre-wrap; overflow-wrap: anywhere; background: {theme_values["background"]}; border: 1px solid {theme_values["border"]}; border-radius: 8px; padding: 12px; }}
 </style>
 </head>
 <body>
 <main>
 <header>
 <h1>{escape(title)}</h1>
-<p class="small">Generated by AxiomBraid 1.0.1 · Theme: {escape(normalized_theme)}</p>
+<p class="small">Generated by AxiomBraid {__version__} · Theme: {escape(normalized_theme)}</p>
 <div class="grid">
 <div class="card">Rows<div class="value">{result['shape']['rows']}</div></div>
 <div class="card">Columns<div class="value">{result['shape']['columns']}</div></div>
@@ -1359,6 +1505,7 @@ a {{ color: {theme_values["accent"]}; }}
 <div class="card">Analysis mode<div class="value" style="font-size:1rem">{escape(result['performance']['effective_mode'])}</div></div>
 </div>
 </header>
+{quality_profile_section}
 <section>
 <h2>Column groups</h2>
 <p><strong>Numerical:</strong> {self._html_list(groups['numerical'], 'None')}</p>
@@ -1377,6 +1524,7 @@ a {{ color: {theme_values["accent"]}; }}
 <table><thead><tr><th>Severity</th><th>Code</th><th>Message</th><th>Columns</th></tr></thead>
 <tbody>{issue_rows}</tbody></table>
 </section>
+{confidence_section}
 <section>
 <h2>Cleaning plan preview</h2>
 <p class="small">Preview only. Manual-review actions are never automatically applied.</p>
@@ -1415,9 +1563,30 @@ a {{ color: {theme_values["accent"]}; }}
         output_path.write_text(html, encoding="utf-8")
         return output_path.resolve()
 
-    def report(self, language: str = "en") -> dict[str, Any]:
+    def report(
+        self,
+        language: str = "en",
+        *,
+        include_confidence: bool = False,
+        confidence_config: dict[str, Any] | None = None,
+        confidence_details: str = "full",
+        include_quality_profile: bool = False,
+        quality_config: dict[str, Any] | None = None,
+        quality_details: str = "full",
+    ) -> dict[str, Any]:
+        """Print a readable console report with optional Version 2 enhancements."""
         language_code = self._language_code(language)
         result = self.inspect(language_code)
+        if include_confidence:
+            from .confidence import add_confidence
+
+            result = add_confidence(result, config=confidence_config)
+        if include_quality_profile:
+            from .scoring_v2 import build_quality_profile
+
+            result["quality_profile"] = build_quality_profile(
+                self.dataframe, result, config=quality_config
+            )
         quality = result["data_quality"]
         none_text = "None" if language_code == "en" else "Koi nahi"
         title = (
@@ -1448,6 +1617,15 @@ a {{ color: {theme_values["accent"]}; }}
         print(f"- Rating: {quality['rating']}")
         print(f"- Fingerprint: {result['dataset_fingerprint']['combined_hash'][:16]}...")
 
+        if include_quality_profile and "quality_profile" in result:
+            from .scoring_v2 import format_quality_profile_console
+
+            print("\n" + format_quality_profile_console(
+                result["quality_profile"],
+                language=language_code,
+                details=quality_details,
+            ))
+
         plan = result["cleaning_plan"]
         print("\nCLEANING PLAN PREVIEW")
         print(f"- Total actions: {plan['action_count']}")
@@ -1476,9 +1654,28 @@ a {{ color: {theme_values["accent"]}; }}
             for issue in result["issues"]:
                 columns = ", ".join(issue["columns"])
                 suffix = f" [{columns}]" if columns else ""
-                print(f"- {issue['severity'].upper()}: {issue['message']}{suffix}")
+                confidence_suffix = ""
+                if include_confidence and "confidence" in issue:
+                    confidence = issue["confidence"]
+                    confidence_suffix = (
+                        f" | Confidence: {int(round(float(confidence['score']) * 100))}% "
+                        f"({str(confidence['level']).upper()})"
+                    )
+                print(
+                    f"- {issue['severity'].upper()}: {issue['message']}{suffix}"
+                    f"{confidence_suffix}"
+                )
         else:
             print(f"- {none_text}")
+
+        if include_confidence:
+            from .confidence import format_confidence_console
+
+            print("\n" + format_confidence_console(
+                result,
+                language=language_code,
+                details=confidence_details,
+            ))
 
         print("\nPOTENTIAL OUTLIERS")
         if result["outliers"]:

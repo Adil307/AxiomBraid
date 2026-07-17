@@ -1,0 +1,40 @@
+AxiomBraid Version 2 Phase 7 Verification
+Version: 2.0.0
+Date: 2026-07-16
+
+Final verification results:
+- Automated tests: 213 passed
+- Statement/branch coverage: 87% in the verification environment
+- Python compileall: passed
+- Critical Ruff checks: passed
+- Release metadata checker: passed
+- Phase 7 example: passed
+- MkDocs navigation file references: passed
+- Wheel build: passed
+- Source distribution build: passed
+- Twine checks: passed
+- Fresh virtual-environment installation with dependencies: passed
+- AB.self_check(): passed
+- AB.compatibility_check(): passed
+- python -m axiombraid --version: AxiomBraid 2.0.0
+
+Distribution artifacts:
+- axiombraid-2.0.0-py3-none-any.whl
+- axiombraid-2.0.0.tar.gz
+
+Interpretation boundaries:
+- Confidence is evidence strength, not calibrated probability.
+- Detection evaluation uses issue/column granularity.
+- Runtime and memory measurements depend on environment and dataset shape.
+- Risky cleaning remains review-first.
+
+FINAL DOXYGEN INTEGRATION
+-------------------------
+- Final Doxyfile added for AxiomBraid 2.0.0.
+- Obsolete Doxygen 1.17 configuration tags removed.
+- Windows CMD generator added to avoid PowerShell signing restrictions.
+- PowerShell generator retained as an optional alternative.
+- Doxygen setup and reviewer-sharing guide added.
+- GitHub Actions Doxygen artifact workflow added.
+- Generated HTML is intentionally excluded from Git and should be generated locally or in CI.
+

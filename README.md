@@ -1,111 +1,123 @@
-# AxiomBraid
+# AxiomBraid 2.0
 
 **Explainable, safety-first data quality for Python.**
 
-AxiomBraid inspects, validates, cleans, compares, and monitors tabular datasets while
-keeping automated changes conservative and visible.
+AxiomBraid inspects, validates, cleans, compares, and monitors tabular datasets while keeping automated changes conservative, visible, and reproducible.
+
+## Installation
+
+```bash
+pip install axiombraid
+```
+
+Windows:
+
+```powershell
+py -m pip install axiombraid
+```
+
+Optional charts:
+
+```bash
+pip install "axiombraid[charts]"
+```
+
+## Quick start
 
 ```python
 import axiombraid as AB
 
 result = AB.inspect("students.csv")
 AB.report("students.csv")
-
 cleaned = AB.clean("students.csv", risk="low")
 AB.export_html("students.csv", "reports/students.html", theme="dark")
 ```
 
-## Why AxiomBraid?
-
-- Detects missing values, duplicates, constant columns, identifiers, outliers, invalid
-  ranges, text inconsistencies, and date-like text.
-- Produces transparent dataset and column quality scores.
-- Uses preview-first, risk-classified, reversible cleaning.
-- Supports contracts, fingerprints, leakage screening, drift history, streaming CSV
-  profiling, caching, plugins, parallel batch analysis, CLI usage, and Roman Urdu output.
-- Does not silently delete outliers, clip invalid values, drop identifiers, or mutate
-  input DataFrames through the functional API.
-
-## Installation
-
-Install the stable release from PyPI:
-
-```bash
-pip install axiombraid
-```
-
-On Windows:
-
-```powershell
-py -m pip install axiombraid
-```
-
-Optional chart support:
-
-```bash
-pip install "axiombraid[charts]"
-```
-
-### Development installation
-
-```bash
-git clone https://github.com/Adil307/AxiomBraid.git
-cd AxiomBraid
-pip install -e ".[dev]"
-```
-
-## Stable API
+## Version 2 explainability
 
 ```python
-import axiombraid as AB
+result = AB.inspect(
+    "students.csv",
+    include_confidence=True,
+    include_quality_profile=True,
+)
 
-df = AB.read_csv("data.csv")
-inspection = AB.inspect(df)
-validation = AB.validate(df, contract)
-comparison = AB.compare(old_df, new_df)
-drift = AB.detect_drift(old_df, new_df)
+AB.report(
+    "students.csv",
+    include_confidence=True,
+    include_quality_profile=True,
+)
 ```
 
-Advanced use:
+The quality profile explains Completeness, Uniqueness, Validity, Consistency, and Integrity. Confidence represents evidence strength, not calibrated probability.
+
+## Controlled evaluation
 
 ```python
-guide = AB.Guide("data.csv")
-guide.report()
-guide.cleaning_plan()
-guide.export_json("report.json")
-guide.export_html("report.html")
+clean = AB.read_csv("clean.csv")
+corrupted, truth = AB.inject_issues(clean, missing_rate=0.05, duplicate_rate=0.05, invalid_range_rate=0.05, random_state=42)
+results = AB.run_evaluation(clean, corruption_config={"missing_rate": 0.05, "duplicate_rate": 0.05, "invalid_range_rate": 0.05, "random_state": 42})
 ```
+
+Evaluation metrics operate at issue/column granularity.
+
+## Main capabilities
+
+- Missing values, duplicates, constants, identifiers, outliers, suspicious ranges, text inconsistencies, and date-like text
+- Explainable dataset, column, and five-dimensional quality scoring
+- Evidence-aware confidence with readable console and HTML reports
+- Preview-first, risk-classified, reversible cleaning
+- Validation contracts, fingerprints, leakage screening, schema comparison, and drift history
+- Controlled synthetic corruption with exact ground truth
+- Precision, recall, F1, confidence diagnostics, quality-response evaluation, and benchmarks
+- Streaming, caching, plugins, batch processing, CLI, and Roman Urdu reports
+
+## Safety
+
+AxiomBraid does not silently delete outliers, clip invalid values, drop identifiers, or mutate input DataFrames through the functional API.
 
 ## Diagnostics
 
 ```python
 print(AB.about())
 print(AB.self_check())
+print(AB.compatibility_check())
 ```
 
-## Command line
+## CLI
 
 ```powershell
-axiombraid inspect data.csv
-axiombraid batch datasets --output reports --workers 4 --format json --format html
-axiombraid stream large.csv --chunksize 100000 --sample-rows 50000
-python -m axiombraid --version
+py -m axiombraid --version
+py -m axiombraid inspect data.csv --confidence --quality-profile
+py -m axiombraid evaluate clean.csv --output reports/evaluation
+py -m axiombraid benchmark data.csv --repeats 3 --output reports/benchmark.json
 ```
 
-## Stability
+License: MIT  
+Repository: https://github.com/Adil307/AxiomBraid
 
-Version 1.0 marks the supported public API. AxiomBraid follows semantic versioning:
-compatible features and fixes belong in 1.x; incompatible public API changes require 2.0.
+## Source-code documentation with Doxygen
 
-The old `dataguidepy` namespace and `dataguide` CLI were deprecated in 0.9 and are not
-shipped in 1.0. See `docs/MIGRATION_FROM_DATAGUIDEPY.md`.
+AxiomBraid 2.0.0 includes final Doxygen configuration for modules, classes, functions, docstrings, source browsing, examples, and Graphviz diagrams.
 
-## Development
+Install the tools on Windows:
 
 ```powershell
-py -m pytest
-py -m pytest --cov=axiombraid
-py benchmarks\benchmark_release.py
+winget install --id DimitriVanHeesch.Doxygen -e
+winget install --id Graphviz.Graphviz -e
 ```
 
-License: MIT.
+Generate and open the documentation without PowerShell execution-policy issues:
+
+```powershell
+.\generate_doxygen.cmd
+```
+
+The generated main page is:
+
+```text
+docs/doxygen/html/index.html
+```
+
+See [`docs/DOXYGEN.md`](docs/DOXYGEN.md) for setup, troubleshooting, CI artifact generation, and reviewer-sharing instructions.
+

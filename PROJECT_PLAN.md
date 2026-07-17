@@ -1,24 +1,26 @@
 # AxiomBraid Project Plan
 
-## Completed: Version 1.0
+## Completed: Version 1
 
-- Stable public functional and object APIs
-- Explainable inspection and quality scoring
-- Safe, reversible cleaning
-- Validation contracts and governance records
-- Fingerprints, leakage screening, schema comparison, and drift detection
-- JSON, HTML, chart, console, English, and Roman Urdu outputs
-- CLI, configuration files, plugins, batching, sampling, streaming, and caching
-- Automated tests, typed-package marker, diagnostics, CI, security scanning,
-  documentation-site source, publishing workflow, and release benchmark
+- Stable inspection, reporting, validation, cleaning, comparison, drift, streaming, caching, batching, plugins, CLI, and governance features
+- Public GitHub and PyPI release
+- Automated testing, documentation, CI, security scanning, and Trusted Publishing
 
-## Post-1.0 priorities
+## Completed: Version 2
 
-- Publish the public GitHub repository and PyPI package
-- Gather real-world issue reports and usability feedback
-- Add benchmark datasets with manually labelled ground truth
-- Measure precision, recall, false-positive rate, runtime, and memory use
-- Improve streaming statistics and drift significance testing
-- Prepare a reproducible empirical research paper
+- Phase 1: explainable confidence foundation
+- Phase 2: detector-specific and per-column confidence evidence
+- Phase 3: human-friendly console, JSON, HTML, CLI, and Roman Urdu confidence reporting
+- Phase 4: five-dimensional explainable quality profile
+- Phase 5: controlled corruption and exact ground truth
+- Phase 6: detection evaluation, quality response, benchmarks, tuning aids, and compatibility checks
+- Phase 7: stable metadata, final hardening, migration, API policy, packaging, and release verification
 
-Breaking public API changes are reserved for Version 2.0.
+## Post-2.0 priorities
+
+- Publish the exact verified `2.0.0` release
+- Gather real-world user feedback and issue reports
+- Maintain private research notes and comparison results separately
+- Validate metrics across independent public datasets
+- Improve detectors through compatible 2.x releases
+- Prepare research work only after sufficient external and experimental evidence is collected
