@@ -4,7 +4,7 @@ title: "AxiomBraid: Explainable, Safety-First Data Quality for Python"
 type: software
 authors:
   - family-names: "Adil"
-    given-names: "Muhammad Adil"
+    given-names: "Muhammad"
 version: "2.0.0"
 date-released: "2026-07-16"
 license: MIT

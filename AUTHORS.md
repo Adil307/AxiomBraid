@@ -1,3 +1,3 @@
 # Authors
 
-- **Aniba Gul** — project creator and lead developer
+- **Muhammad Adil** - Project creator and lead developer
