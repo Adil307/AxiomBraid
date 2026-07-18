@@ -334,12 +334,42 @@ def inject_issues(
     ]
     outlier_eligible = preferred_outlier_columns or fallback_outlier_columns
     outlier_columns = _select_columns(frame, restrictions.get("outliers"), outlier_eligible)
-    outlier_cells = [
-        (int(row), column)
-        for column in outlier_columns
-        for row in frame.index
-        if pd.notna(frame.at[row, column])
-    ]
+    outlier_profiles: dict[str, dict[str, Any]] = {}
+    outlier_cells: list[tuple[int, str]] = []
+
+    for column in outlier_columns:
+        numeric = pd.to_numeric(frame[column], errors="coerce")
+        valid = numeric.dropna()
+        if len(valid) < 4:
+            continue
+
+        q1 = float(valid.quantile(0.25))
+        q3 = float(valid.quantile(0.75))
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        scale = iqr if iqr > 0 else max(abs(float(valid.mean())), 1.0)
+
+        # Only replace source cells that are not baseline IQR outliers. This
+        # prevents a synthetic "injection" from merely replacing one existing
+        # outlier with another and producing ambiguous ground truth.
+        candidate_rows = numeric.index[
+            numeric.notna() & numeric.ge(lower) & numeric.le(upper)
+        ].tolist()
+
+        if not candidate_rows:
+            continue
+
+        outlier_profiles[column] = {
+            "q1": q1,
+            "q3": q3,
+            "iqr": iqr,
+            "lower_bound": lower,
+            "upper_bound": upper,
+            "scale": scale,
+        }
+        outlier_cells.extend((int(row), column) for row in candidate_rows)
+
     outlier_selected = rng.sample(
         outlier_cells,
         _count(rates["outlier_rate"], len(outlier_cells)),
@@ -347,19 +377,30 @@ def inject_issues(
     if outlier_selected:
         locations = []
         for row, column in outlier_selected:
-            numeric = pd.to_numeric(frame[column], errors="coerce").dropna()
+            profile = outlier_profiles[column]
             previous = frame.at[row, column]
             if not pd.api.types.is_float_dtype(frame[column].dtype):
                 frame[column] = pd.to_numeric(frame[column], errors="coerce").astype(float)
-            if numeric.empty:
-                continue
-            q1 = float(numeric.quantile(0.25))
-            q3 = float(numeric.quantile(0.75))
-            iqr = q3 - q1
-            scale = iqr if iqr > 0 else max(abs(float(numeric.mean())), 1.0)
-            injected = q3 + 20.0 * scale + 1.0
+
+            # A large deterministic margin keeps the injected observation well
+            # beyond the IQR boundary after normal quartile recomputation.
+            injected = (
+                float(profile["upper_bound"])
+                + 1000.0 * float(profile["scale"])
+                + 1.0
+            )
             frame.at[row, column] = injected
-            locations.append({"row": row, "column": column, "original": previous, "injected": injected})
+            locations.append(
+                {
+                    "row": row,
+                    "column": column,
+                    "original": previous,
+                    "injected": injected,
+                    "source_row_was_baseline_non_outlier": True,
+                    "baseline_lower_bound": profile["lower_bound"],
+                    "baseline_upper_bound": profile["upper_bound"],
+                }
+            )
         if locations:
             events.append(
                 _event(

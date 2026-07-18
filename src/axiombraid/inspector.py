@@ -9,6 +9,7 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from ._version import __version__
@@ -401,14 +402,27 @@ class DataGuide(
         return value
 
     def _outliers(self) -> dict[str, dict[str, Any]]:
-        """Detect potential numerical outliers using the IQR rule."""
+        """Detect potential numerical outliers using the IQR rule.
+
+        This unreleased fix adds row-level evidence and ranks examples by distance
+        beyond the IQR boundary. Earlier releases returned the first ten
+        outliers by source order, which could hide a newly injected extreme
+        value even when it was correctly detected.
+        """
         results: dict[str, dict[str, Any]] = {}
         identifiers = set(self._special_columns()["possible_identifiers"])
+        evidence_limit = 1000
+        example_limit = 10
 
         for column in self._column_groups()["numerical"]:
             if column in identifiers:
                 continue
-            series = pd.to_numeric(self.dataframe[column], errors="coerce").dropna()
+
+            numeric = pd.to_numeric(self.dataframe[column], errors="coerce")
+            valid_mask = numeric.notna()
+            valid_positions = np.flatnonzero(valid_mask.to_numpy())
+            series = numeric.iloc[valid_positions]
+
             if len(series) < self.min_outlier_sample_size:
                 continue
 
@@ -418,9 +432,55 @@ class DataGuide(
             lower = q1 - self.outlier_iqr_multiplier * iqr
             upper = q3 + self.outlier_iqr_multiplier * iqr
             mask = (series < lower) | (series > upper)
-            detected = series[mask]
-            if detected.empty:
+
+            if not bool(mask.any()):
                 continue
+
+            detected_values = series[mask]
+            detected_positions = valid_positions[mask.to_numpy()]
+            lower_flags = detected_values < lower
+            upper_flags = detected_values > upper
+
+            evidence_records: list[dict[str, Any]] = []
+            scale = iqr if iqr > 0 else 1.0
+
+            for row_position, (row_index, value) in zip(
+                detected_positions.tolist(),
+                detected_values.items(),
+            ):
+                numeric_value = float(value)
+                if numeric_value < lower:
+                    direction = "lower"
+                    distance = lower - numeric_value
+                else:
+                    direction = "upper"
+                    distance = numeric_value - upper
+
+                evidence_records.append(
+                    {
+                        "row_position": int(row_position),
+                        "row_index": self._python_value(row_index),
+                        "value": self._python_value(value),
+                        "direction": direction,
+                        "distance_beyond_bound": round(float(distance), 6),
+                        "normalized_distance": round(float(distance / scale), 6),
+                    }
+                )
+
+            # Strongest evidence first. This makes newly injected extreme
+            # values visible even when the total outlier count is unchanged
+            # because another borderline observation moved inside the bounds.
+            evidence_records.sort(
+                key=lambda item: (
+                    float(item["normalized_distance"]),
+                    float(item["distance_beyond_bound"]),
+                ),
+                reverse=True,
+            )
+
+            stored_records = evidence_records[:evidence_limit]
+            example_records = stored_records[:example_limit]
+            count = len(evidence_records)
 
             results[column] = {
                 "method": "iqr",
@@ -429,12 +489,22 @@ class DataGuide(
                 "q3": round(q3, 6),
                 "lower_bound": round(lower, 6),
                 "upper_bound": round(upper, 6),
-                "count": int(mask.sum()),
-                "percentage": round((int(mask.sum()) / len(series)) * 100, 2),
-                "example_values": [
-                    self._python_value(value)
-                    for value in detected.head(10).tolist()
+                "count": count,
+                "lower_count": int(lower_flags.sum()),
+                "upper_count": int(upper_flags.sum()),
+                "percentage": round((count / len(series)) * 100, 2),
+                "example_values": [item["value"] for item in example_records],
+                "example_indices": [item["row_index"] for item in example_records],
+                "example_row_positions": [
+                    item["row_position"] for item in example_records
                 ],
+                "example_records": example_records,
+                "outlier_indices": [item["row_index"] for item in stored_records],
+                "outlier_row_positions": [
+                    item["row_position"] for item in stored_records
+                ],
+                "outlier_evidence_complete": count <= evidence_limit,
+                "outlier_evidence_limit": evidence_limit,
             }
         return results
 

@@ -177,3 +177,59 @@ def test_human_friendly_evaluation_and_benchmark_formatters(capsys):
     benchmark = AB.benchmark_inspection(_clean_frame(10), repeats=1)
     benchmark_text = AB.format_benchmark_console(benchmark)
     assert "AXIOMBRAID INSPECTION BENCHMARK" in benchmark_text
+
+def test_outlier_event_evaluation_handles_preexisting_column_findings():
+    from axiombraid.evaluation import evaluate_detection
+
+    baseline = {
+        "issues": [
+            {"code": "potential_outliers", "columns": ["Value"]},
+        ],
+        "outliers": {
+            "Value": {
+                "outlier_row_positions": [1],
+                "outlier_evidence_complete": True,
+            }
+        },
+    }
+    corrupted = {
+        "issues": [
+            {"code": "potential_outliers", "columns": ["Value"]},
+        ],
+        "outliers": {
+            "Value": {
+                "outlier_row_positions": [1, 8],
+                "outlier_evidence_complete": True,
+            }
+        },
+    }
+    truth = {
+        "events": [
+            {
+                "issue_code": "potential_outliers",
+                "columns": ["Value"],
+                "row_indices": [8],
+                "cell_locations": [
+                    {
+                        "row": 8,
+                        "column": "Value",
+                        "original": 0.43,
+                        "injected": 5780.0,
+                    }
+                ],
+            }
+        ]
+    }
+
+    result = evaluate_detection(
+        corrupted,
+        truth,
+        baseline_inspection=baseline,
+    )
+    event_result = result["outlier_event_evaluation"]
+
+    assert event_result["status"] == "evaluated"
+    assert event_result["true_positives"] == 1
+    assert event_result["false_positives"] == 0
+    assert event_result["false_negatives"] == 0
+    assert event_result["recall"] == 1.0
