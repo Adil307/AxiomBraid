@@ -22,7 +22,7 @@ import pandas as pd
 from .corruption import ground_truth_pairs, inject_issues
 
 
-EVALUATION_VERSION = "1.0"
+EVALUATION_VERSION = "1.1"
 EVALUATABLE_CODES = {
     "missing_values",
     "duplicate_rows",
@@ -69,6 +69,132 @@ def _metric(tp: int, fp: int, fn: int) -> dict[str, Any]:
         "recall": round(recall, 4),
         "f1": round(f1, 4),
         "false_positive_share": round(false_positive_rate, 4),
+    }
+
+def _outlier_position_pairs(
+    inspection: dict[str, Any] | None,
+) -> tuple[set[tuple[str, int]], bool]:
+    """Return ``(column, row_position)`` outlier evidence from an inspection.
+
+    The boolean indicates whether every included column exposed complete
+    row-level evidence. Version 2.0.0 reports do not contain this evidence and
+    therefore return ``False`` without guessing.
+    """
+    if not isinstance(inspection, dict):
+        return set(), False
+
+    section = inspection.get("outliers", {})
+    if not isinstance(section, dict):
+        return set(), False
+
+    pairs: set[tuple[str, int]] = set()
+    complete = True
+
+    for column, details in section.items():
+        if not isinstance(details, dict):
+            complete = False
+            continue
+
+        positions = details.get("outlier_row_positions")
+        if not isinstance(positions, list):
+            complete = False
+            continue
+
+        if details.get("outlier_evidence_complete") is not True:
+            complete = False
+
+        for position in positions:
+            if isinstance(position, bool) or not isinstance(position, int):
+                complete = False
+                continue
+            pairs.add((str(column), int(position)))
+
+    return pairs, complete
+
+
+def _ground_truth_outlier_pairs(
+    ground_truth: dict[str, Any],
+) -> set[tuple[str, int]]:
+    """Return injected outlier ``(column, row_position)`` pairs."""
+    pairs: set[tuple[str, int]] = set()
+
+    for event in ground_truth.get("events", []):
+        if not isinstance(event, dict):
+            continue
+        if str(event.get("issue_code", "")) != "potential_outliers":
+            continue
+
+        locations = event.get("cell_locations", [])
+        if isinstance(locations, list):
+            for location in locations:
+                if not isinstance(location, dict):
+                    continue
+                column = location.get("column")
+                row = location.get("row")
+                if isinstance(column, str) and isinstance(row, int) and not isinstance(row, bool):
+                    pairs.add((column, row))
+
+    return pairs
+
+
+def _evaluate_outlier_events(
+    inspection: dict[str, Any],
+    ground_truth: dict[str, Any],
+    baseline_inspection: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Evaluate injected outliers at row level when complete evidence exists."""
+    expected = _ground_truth_outlier_pairs(ground_truth)
+    detected, detected_complete = _outlier_position_pairs(inspection)
+    baseline, baseline_complete = _outlier_position_pairs(baseline_inspection)
+
+    evidence_complete = detected_complete and (
+        baseline_inspection is None or baseline_complete
+    )
+
+    if not expected:
+        return {
+            "status": "not_applicable",
+            "granularity": "outlier_cell",
+            "expected_event_count": 0,
+            "evidence_complete": evidence_complete,
+            **_metric(0, 0, 0),
+        }
+
+    if not evidence_complete:
+        return {
+            "status": "not_evaluated_incomplete_evidence",
+            "granularity": "outlier_cell",
+            "expected_event_count": len(expected),
+            "evidence_complete": False,
+            "note": (
+                "Row-level outlier evidence is unavailable or truncated. "
+                "No event-level accuracy claim was made."
+            ),
+        }
+
+    newly_detected = detected - baseline
+    true_positive_pairs = expected & detected
+    false_negative_pairs = expected - detected
+    false_positive_pairs = newly_detected - expected
+    metrics = _metric(
+        len(true_positive_pairs),
+        len(false_positive_pairs),
+        len(false_negative_pairs),
+    )
+
+    return {
+        "status": "evaluated",
+        "granularity": "outlier_cell",
+        "expected_event_count": len(expected),
+        "evidence_complete": True,
+        **metrics,
+        "true_positive_pairs": [list(item) for item in sorted(true_positive_pairs)],
+        "false_positive_pairs": [list(item) for item in sorted(false_positive_pairs)],
+        "false_negative_pairs": [list(item) for item in sorted(false_negative_pairs)],
+        "note": (
+            "This event-level diagnostic avoids inferring detection from a net "
+            "change in per-column outlier counts."
+        ),
     }
 
 
@@ -177,6 +303,11 @@ def evaluate_detection(
         "false_negative_pairs": [list(pair) for pair in sorted(fn_pairs)],
         "confidence_records": confidence_records,
         "confidence_diagnostics": confidence_diagnostics,
+        "outlier_event_evaluation": _evaluate_outlier_events(
+            inspection_result,
+            ground_truth,
+            baseline_inspection,
+        ),
         "note": (
             "Metrics operate at issue/column granularity because that is the "
             "public detection granularity exposed by AxiomBraid inspection reports. "

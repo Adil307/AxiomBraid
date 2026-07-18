@@ -46,6 +46,39 @@ def test_outlier_detection_iqr():
     assert outliers["Study_Hours"]["example_values"] == [50]
 
 
+def test_outlier_evidence_exposes_new_extreme_when_count_is_unchanged():
+    # A new extreme may replace a normal value while an old borderline
+    # observation moves inside recomputed IQR bounds. Net count can remain
+    # unchanged, so row-level evidence is required.
+    values = [
+        1.16, 0.85, 2.16, 1.13, 0.53, 1.54, 4.78, 3.12, 0.43, 0.22,
+        0.47, 1.05, 0.06, 0.77, 0.22, 0.42, 0.52, 0.68, 1.64, 3.49,
+    ]
+    baseline = pd.DataFrame({"Value": values})
+    corrupted = baseline.copy(deep=True)
+    corrupted.loc[8, "Value"] = 5780.0
+
+    baseline_outliers = DataGuide(baseline).inspect()["outliers"]["Value"]
+    corrupted_outliers = DataGuide(corrupted).inspect()["outliers"]["Value"]
+
+    assert baseline_outliers["count"] == 2
+    assert corrupted_outliers["count"] == 2
+    assert 8 in corrupted_outliers["outlier_row_positions"]
+    assert corrupted_outliers["example_records"][0]["row_position"] == 8
+    assert corrupted_outliers["example_records"][0]["value"] == 5780.0
+    assert corrupted_outliers["outlier_evidence_complete"] is True
+
+
+def test_outlier_evidence_has_directional_counts_and_indices():
+    df = pd.DataFrame({"Value": [-100, 1, 2, 2, 3, 4, 100]})
+    details = DataGuide(df).inspect()["outliers"]["Value"]
+
+    assert details["lower_count"] == 1
+    assert details["upper_count"] == 1
+    assert set(details["example_row_positions"]) == {0, 6}
+    assert set(details["example_indices"]) == {0, 6}
+
+
 def test_outlier_detection_respects_minimum_sample():
     df = pd.DataFrame({"Value": [1, 2, 100]})
     assert DataGuide(df).inspect()["outliers"] == {}
