@@ -25,7 +25,7 @@ def phase3_frame():
 
 
 def test_phase3_alpha_metadata():
-    assert AB.__version__ == "2.0.0"
+    assert AB.__version__ == "2.0.1"
     assert AB.VERSION_INFO == (2, 0, 0)
     assert AB.API_STATUS == "stable"
     assert AB.PUBLIC_API_VERSION == "2"
@@ -136,7 +136,7 @@ def test_html_export_can_include_professional_confidence_section(tmp_path):
     assert "Recommended action" in html
     assert "Technical details" in html
     assert "badge-high" in html
-    assert "AxiomBraid 2.0.0" in html
+    assert "AxiomBraid 2.0.1" in html
 
 
 def test_default_html_export_does_not_add_confidence_section(tmp_path):

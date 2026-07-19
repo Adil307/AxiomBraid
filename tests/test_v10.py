@@ -31,7 +31,7 @@ EXPECTED_PUBLIC_API = {
 
 
 def test_stable_release_metadata():
-    assert AB.__version__ == "2.0.0"
+    assert AB.__version__ == "2.0.1"
     assert AB.VERSION_INFO == (2, 0, 0)
     assert AB.API_STATUS == "stable"
     assert AB.PUBLIC_API_VERSION == "2"
@@ -47,7 +47,7 @@ def test_public_api_is_frozen_and_importable():
 def test_about_is_json_serializable():
     payload = AB.about()
     assert payload["brand"] == "AxiomBraid"
-    assert payload["version"] == "2.0.0"
+    assert payload["version"] == "2.0.1"
     assert payload["api_status"] == "stable"
     json.dumps(payload)
 
@@ -70,7 +70,7 @@ def test_python_module_cli_version():
         env=environment,
     )
     assert completed.returncode == 0
-    assert "AxiomBraid 2.0.0" in completed.stdout
+    assert "AxiomBraid 2.0.1" in completed.stdout
 
 
 def test_pep561_marker_is_packaged_in_source_tree():
@@ -91,7 +91,7 @@ def test_functional_api_safety_and_roundtrip(tmp_path):
     assert cleaned.loc[1, "Department"] == "CS"
     report = AB.export_html(original, tmp_path / "report")
     assert report.exists()
-    assert "AxiomBraid 2.0.0" in report.read_text(encoding="utf-8")
+    assert "AxiomBraid 2.0.1" in report.read_text(encoding="utf-8")
 
 
 def test_legacy_namespace_not_shipped_in_source_tree():

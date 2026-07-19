@@ -120,7 +120,7 @@ def test_html_export_can_include_quality_profile(tmp_path):
     assert "Explainable Data Quality Profile" in html
     assert "Dimension breakdown" in html
     assert "Improvement priorities" in html
-    assert "AxiomBraid 2.0.0" in html
+    assert "AxiomBraid 2.0.1" in html
 
 
 def test_profile_keeps_legacy_score_for_comparison():

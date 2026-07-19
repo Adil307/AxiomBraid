@@ -20,7 +20,7 @@ def frame():
 
 def test_brand_and_alias_style():
     assert AB.BRAND_NAME == "AxiomBraid"
-    assert AB.__version__ == "2.0.0"
+    assert AB.__version__ == "2.0.1"
     assert AB.Guide is AB.DataGuide
     assert AB.API_STATUS == "stable"
 
@@ -62,7 +62,7 @@ def test_functional_validate_compare_and_drift():
 
 def test_export_html_function(tmp_path):
     path = AB.export_html(frame(), tmp_path/"report", theme="minimal")
-    assert path.exists() and "AxiomBraid 2.0.0" in path.read_text(encoding="utf-8")
+    assert path.exists() and "AxiomBraid 2.0.1" in path.read_text(encoding="utf-8")
 
 
 def test_cache_miss_hit_and_refresh(tmp_path):

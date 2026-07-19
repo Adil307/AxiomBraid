@@ -102,7 +102,7 @@ def test_compatibility_check_protects_v1_and_v2_api():
     result = AB.compatibility_check()
     assert result["ok"] is True
     assert result["missing"] == []
-    assert result["version"] == "2.0.0"
+    assert result["version"] == "2.0.1"
 
 
 def test_cli_benchmark_and_evaluate(tmp_path):

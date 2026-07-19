@@ -27,7 +27,7 @@ def _issue(result, code):
 
 
 def test_phase2_alpha_metadata():
-    assert AB.__version__ == "2.0.0"
+    assert AB.__version__ == "2.0.1"
     assert AB.VERSION_INFO == (2, 0, 0)
     assert AB.API_STATUS == "stable"
     assert AB.PUBLIC_API_VERSION == "2"

@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 import axiombraid as AB
-EXPECTED = "2.0.0"
+EXPECTED = "2.0.1"
 
 def main() -> int:
     errors = []
@@ -36,7 +36,7 @@ def main() -> int:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
-    print("AxiomBraid 2.0.0 release checks passed.")
+    print("AxiomBraid 2.0.1 release checks passed.")
     return 0
 
 if __name__ == "__main__":
