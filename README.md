@@ -1,5 +1,5 @@
 # AxiomBraid 2.0
-
+[![DOI](https://zenodo.org/badge/1298714963.svg)](https://doi.org/10.5281/zenodo.21828590)
 **Explainable, safety-first data quality for Python.**
 
 AxiomBraid inspects, validates, cleans, compares, and monitors tabular datasets while keeping automated changes conservative, visible, and reproducible.
