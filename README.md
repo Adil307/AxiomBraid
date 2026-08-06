@@ -1,4 +1,4 @@
-# AxiomBraid 2.0
+# AxiomBraid 2.0.1
 [![DOI](https://zenodo.org/badge/1298714963.svg)](https://doi.org/10.5281/zenodo.21828590)
 **Explainable, safety-first data quality for Python.**
 
